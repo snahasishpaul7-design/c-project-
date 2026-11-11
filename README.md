@@ -1,9 +1,6 @@
 <p align="center">
   <h1 align="center">💊 MediCare Pharmacy Management System</h1>
   <p align="center">
-    <img src="https://raw.githubusercontent.com/yourusername/medicare-pharmacy/main/assets/banner.gif" alt="MediCare Animated Banner" width="680"/>
-  </p>
-  <p align="center">
     <img src="https://img.shields.io/badge/Platform-Windows-blue?style=for-the-badge&logo=windows" />
     <img src="https://img.shields.io/badge/.NET_Framework-4.7.2-purple?style=for-the-badge&logo=dotnet" />
     <img src="https://img.shields.io/badge/Database-SQL_Server-red?style=for-the-badge&logo=microsoftsqlserver" />
@@ -115,16 +112,24 @@
 | MedicineID | INT (FK) | References Medicines |
 | Quantity | INT | Quantity added to cart |
 
-### 📦 Orders
+### 📦 OrderHeaders
 | Column | Type | Description |
 |---|---|---|
-| OrderID | INT (PK) | Auto-increment primary key |
-| UserID | INT (FK) | References Users |
-| MedicineName | NVARCHAR(100) | Medicine ordered |
-| Quantity | INT | Quantity ordered |
-| TotalPrice | DECIMAL(10,2) | Total price |
-| OrderDate | DATETIME | Date of order |
+| OrderHeaderID | INT (PK) | Auto-increment order ID |
+| UserID | INT (FK) | Customer who placed the order |
+| TotalPrice | DECIMAL(10,2) | Total order amount |
 | Status | NVARCHAR(20) | Pending / Processing / Delivered |
+| OrderDate | DATETIME | Date of the order |
+
+### 📦 OrderItems
+| Column | Type | Description |
+|---|---|---|
+| OrderItemID | INT (PK) | Auto-increment line ID |
+| OrderHeaderID | INT (FK) | Parent order |
+| MedicineName | NVARCHAR(100) | Ordered medicine |
+| Quantity | INT | Quantity ordered |
+| UnitPrice | DECIMAL(10,2) | Price per unit |
+| TotalPrice | DECIMAL(10,2) | Line total |
 
 ### 📄 Prescriptions
 | Column | Type | Description |
@@ -141,18 +146,18 @@
 ## 📁 Project Structure
 
 ```
-PharmacyUser/
-├── PharmacyUser/
-│   ├── 🚀 Program.cs
-│   ├── 🔌 DBHelper.cs
-│   ├── 🔐 LoginForm.cs
-│   ├── 📝 RegisterForm.cs
-│   ├── 🔑 ForgotPasswordForm.cs
-│   ├── 👤 CustomerDashboard.cs
-│   ├── 💊 PharmacistDashboard.cs
-│   ├── 🛡️ AdminDashboard.cs
-│   └── ⚙️ App.config
-└── PharmacyUser.sln
+.
+├── PharmacyUser.sln
+└── PharmacyUser/
+    ├── Program.cs
+    ├── DBHelper.cs
+    ├── LoginForm.cs
+    ├── RegisterForm.cs
+    ├── ForgotPasswordForm.cs
+    ├── CustomerDashboard.cs
+    ├── PharmacistDashboard.cs
+    ├── AdminDashboard.cs
+    └── App.config
 ```
 
 ---
@@ -171,8 +176,8 @@ Before you begin, make sure you have the following installed:
 
 **Step 1 — Clone the repository**
 ```bash
-git clone https://github.com/yourusername/medicare-pharmacy.git
-cd medicare-pharmacy
+git clone https://github.com/snahasishpaul7-design/c-project-.git
+cd c-project-
 ```
 
 **Step 2 — Set up the database**
@@ -196,10 +201,11 @@ CREATE TABLE Users (
 
 CREATE TABLE Medicines (
     MedicineID INT IDENTITY(1,1) PRIMARY KEY,
-    Name       NVARCHAR(100)  NOT NULL,
+    Name       NVARCHAR(100) NOT NULL,
     Category   NVARCHAR(50),
-    Price      DECIMAL(10,2)  NOT NULL,
-    Stock      INT            NOT NULL DEFAULT 0
+    Price      DECIMAL(10,2) NOT NULL,
+    Stock      INT NOT NULL DEFAULT 0,
+    ImagePath  NVARCHAR(500) NULL
 );
 
 CREATE TABLE Cart (
@@ -207,28 +213,36 @@ CREATE TABLE Cart (
     UserID     INT NOT NULL,
     MedicineID INT NOT NULL,
     Quantity   INT NOT NULL DEFAULT 1,
-    FOREIGN KEY (UserID)     REFERENCES Users(UserID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (MedicineID) REFERENCES Medicines(MedicineID)
 );
 
-CREATE TABLE Orders (
-    OrderID      INT IDENTITY(1,1) PRIMARY KEY,
-    UserID       INT            NOT NULL,
-    MedicineName NVARCHAR(100)  NOT NULL,
-    Quantity     INT            NOT NULL,
-    TotalPrice   DECIMAL(10,2)  NOT NULL,
-    OrderDate    DATETIME       NOT NULL DEFAULT GETDATE(),
-    Status       NVARCHAR(20)   NOT NULL DEFAULT 'Pending',
+CREATE TABLE OrderHeaders (
+    OrderHeaderID INT IDENTITY(1,1) PRIMARY KEY,
+    UserID        INT NOT NULL,
+    TotalPrice    DECIMAL(10,2) NOT NULL,
+    Status        NVARCHAR(20) NOT NULL DEFAULT 'Pending',
+    OrderDate     DATETIME NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE OrderItems (
+    OrderItemID   INT IDENTITY(1,1) PRIMARY KEY,
+    OrderHeaderID INT NOT NULL,
+    MedicineName  NVARCHAR(100) NOT NULL,
+    Quantity      INT NOT NULL,
+    UnitPrice     DECIMAL(10,2) NOT NULL,
+    TotalPrice    DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (OrderHeaderID) REFERENCES OrderHeaders(OrderHeaderID)
 );
 
 CREATE TABLE Prescriptions (
     PrescriptionID INT IDENTITY(1,1) PRIMARY KEY,
-    UserID         INT            NOT NULL,
-    FileName       NVARCHAR(255)  NOT NULL,
+    UserID         INT NOT NULL,
+    FileName       NVARCHAR(255) NOT NULL,
     FilePath       NVARCHAR(500),
-    UploadDate     DATETIME       NOT NULL DEFAULT GETDATE(),
-    Status         NVARCHAR(20)   NOT NULL DEFAULT 'Pending',
+    UploadDate     DATETIME NOT NULL DEFAULT GETDATE(),
+    Status         NVARCHAR(20) NOT NULL DEFAULT 'Pending',
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
@@ -250,7 +264,7 @@ VALUES ('Admin', 'User', 'arnob', 'admin@medicare.com', '01700000000', '1', 'Adm
 
 **Step 3 — Open the project**
 
-Open `PharmacyUser.sln` in Visual Studio.
+Open `PharmacyUser.sln` from the repository root in Visual Studio.
 
 **Step 4 — Check the connection string**
 
