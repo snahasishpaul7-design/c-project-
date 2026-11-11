@@ -103,6 +103,7 @@
 | Category | NVARCHAR(50) | Medicine category |
 | Price | DECIMAL(10,2) | Price per unit |
 | Stock | INT | Available stock quantity |
+| ImagePath | NVARCHAR(500) | Optional medicine image path |
 
 ### 🛒 Cart
 | Column | Type | Description |
@@ -317,4 +318,3 @@ Press `Ctrl + Shift + B` to build, then `F5` to run. 🎉
 <p align="center">
   Made with ❤️ by the MediCare Team
 </p>
-```
